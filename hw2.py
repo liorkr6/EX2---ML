@@ -6,61 +6,62 @@ import matplotlib.pyplot as plt
 # The second key is the p-value cut-off
 # The values are the chi-statistic that you need to use in the pruning
 
-chi_table = {1: {0.5 : 0.45,
-             0.25 : 1.32,
-             0.1 : 2.71,
-             0.05 : 3.84,
-             0.0001 : 100000},
-         2: {0.5 : 1.39,
-             0.25 : 2.77,
-             0.1 : 4.60,
-             0.05 : 5.99,
-             0.0001 : 100000},
-         3: {0.5 : 2.37,
-             0.25 : 4.11,
-             0.1 : 6.25,
-             0.05 : 7.82,
-             0.0001 : 100000},
-         4: {0.5 : 3.36,
-             0.25 : 5.38,
-             0.1 : 7.78,
-             0.05 : 9.49,
-             0.0001 : 100000},
-         5: {0.5 : 4.35,
-             0.25 : 6.63,
-             0.1 : 9.24,
-             0.05 : 11.07,
-             0.0001 : 100000},
-         6: {0.5 : 5.35,
-             0.25 : 7.84,
-             0.1 : 10.64,
-             0.05 : 12.59,
-             0.0001 : 100000},
-         7: {0.5 : 6.35,
-             0.25 : 9.04,
-             0.1 : 12.01,
-             0.05 : 14.07,
-             0.0001 : 100000},
-         8: {0.5 : 7.34,
-             0.25 : 10.22,
-             0.1 : 13.36,
-             0.05 : 15.51,
-             0.0001 : 100000},
-         9: {0.5 : 8.34,
-             0.25 : 11.39,
-             0.1 : 14.68,
-             0.05 : 16.92,
-             0.0001 : 100000},
-         10: {0.5 : 9.34,
-              0.25 : 12.55,
-              0.1 : 15.99,
-              0.05 : 18.31,
-              0.0001 : 100000},
-         11: {0.5 : 10.34,
-              0.25 : 13.7,
-              0.1 : 17.27,
-              0.05 : 19.68,
-              0.0001 : 100000}}
+chi_table = {1: {0.5: 0.45,
+                 0.25: 1.32,
+                 0.1: 2.71,
+                 0.05: 3.84,
+                 0.0001: 100000},
+             2: {0.5: 1.39,
+                 0.25: 2.77,
+                 0.1: 4.60,
+                 0.05: 5.99,
+                 0.0001: 100000},
+             3: {0.5: 2.37,
+                 0.25: 4.11,
+                 0.1: 6.25,
+                 0.05: 7.82,
+                 0.0001: 100000},
+             4: {0.5: 3.36,
+                 0.25: 5.38,
+                 0.1: 7.78,
+                 0.05: 9.49,
+                 0.0001: 100000},
+             5: {0.5: 4.35,
+                 0.25: 6.63,
+                 0.1: 9.24,
+                 0.05: 11.07,
+                 0.0001: 100000},
+             6: {0.5: 5.35,
+                 0.25: 7.84,
+                 0.1: 10.64,
+                 0.05: 12.59,
+                 0.0001: 100000},
+             7: {0.5: 6.35,
+                 0.25: 9.04,
+                 0.1: 12.01,
+                 0.05: 14.07,
+                 0.0001: 100000},
+             8: {0.5: 7.34,
+                 0.25: 10.22,
+                 0.1: 13.36,
+                 0.05: 15.51,
+                 0.0001: 100000},
+             9: {0.5: 8.34,
+                 0.25: 11.39,
+                 0.1: 14.68,
+                 0.05: 16.92,
+                 0.0001: 100000},
+             10: {0.5: 9.34,
+                  0.25: 12.55,
+                  0.1: 15.99,
+                  0.05: 18.31,
+                  0.0001: 100000},
+             11: {0.5: 10.34,
+                  0.25: 13.7,
+                  0.1: 17.27,
+                  0.05: 19.68,
+                  0.0001: 100000}}
+
 
 def calc_gini(data):
     """
@@ -74,22 +75,19 @@ def calc_gini(data):
     """
 
     ###########################################################################
-    classColumn = data[:, -1]
+    classColumn = data.iloc[:, -1]
     totalEntries = len(classColumn)
-    classes, counts = np.unique(classColumn, return_counts=True)
+    classCounts = classColumn.value_counts()
     gini = 1
-    for c in counts:
-        gini = gini - (c/totalEntries)**2
+    for c in classCounts:
+        prob = c / totalEntries
+        gini -= prob ** 2
     return gini
-    
-    # p_sum = 0
-    # for key in value_counts.keys():
-    #     p_sum = p_sum  +  (value_counts[key] / n ) * (value_counts[key] / n ) 
-    # gini = 1 - p_sum
-    # return gini
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
+
 
 def calc_entropy(data):
     """
@@ -102,14 +100,18 @@ def calc_entropy(data):
     - entropy: The entropy value.
     """
     entropy = 0.0
-    ###########################################################################
-    print(data)                                       #
-    ###########################################################################
-    pass
+    classColumn = data.iloc[:, -1]
+    totalEntries = len(classColumn)
+    classCounts = classColumn.value_counts()
+    for c in classCounts:
+        prob = c / totalEntries
+        entropy -= prob * np.log2(prob)
+    return entropy
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
-    return entropy
+
 
 def goodness_of_split(data, feature, impurity_func, gain_ratio=False):
     """
@@ -127,7 +129,7 @@ def goodness_of_split(data, feature, impurity_func, gain_ratio=False):
               according to the feature values.
     """
     goodness = 0
-    groups = {} # groups[feature_value] = data_subset
+    groups = {}  # groups[feature_value] = data_subset
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
@@ -137,21 +139,21 @@ def goodness_of_split(data, feature, impurity_func, gain_ratio=False):
     ###########################################################################
     return goodness, groups
 
+
 class DecisionNode:
 
-    def __init__(self, data, feature=-1,depth=0, chi=1, max_depth=1000, gain_ratio=False):
-        
-        self.data = data # the relevant data for the node
-        self.feature = feature # column index of criteria being tested
-        self.pred = self.calc_node_pred() # the prediction of the node
-        self.depth = depth # the current depth of the node
-        self.children = [] # array that holds this nodes children
+    def __init__(self, data, feature=-1, depth=0, chi=1, max_depth=1000, gain_ratio=False):
+        self.data = data  # the relevant data for the node
+        self.feature = feature  # column index of criteria being tested
+        self.pred = self.calc_node_pred()  # the prediction of the node
+        self.depth = depth  # the current depth of the node
+        self.children = []  # array that holds this nodes children
         self.children_values = []
-        self.terminal = False # determines if the node is a leaf
-        self.chi = chi 
-        self.max_depth = max_depth # the maximum allowed depth of the tree
-        self.gain_ratio = gain_ratio 
-    
+        self.terminal = False  # determines if the node is a leaf
+        self.chi = chi
+        self.max_depth = max_depth  # the maximum allowed depth of the tree
+        self.gain_ratio = gain_ratio
+
     def calc_node_pred(self):
         """
         Calculate the node prediction.
@@ -168,7 +170,7 @@ class DecisionNode:
         #                             END OF YOUR CODE                            #
         ###########################################################################
         return pred
-        
+
     def add_child(self, node, val):
         """
         Adds a child node to self.children and updates self.children_values
@@ -177,9 +179,8 @@ class DecisionNode:
         """
         self.children.append(node)
         self.children_values.append(val)
-     
-    def split(self, impurity_func):
 
+    def split(self, impurity_func):
         """
         Splits the current node according to the impurity_func. This function finds
         the best feature to split according to and create the corresponding children.
@@ -197,6 +198,7 @@ class DecisionNode:
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
+
 
 def build_tree(data, impurity, gain_ratio=False, chi=1, max_depth=1000):
     """
@@ -222,6 +224,7 @@ def build_tree(data, impurity, gain_ratio=False, chi=1, max_depth=1000):
     ###########################################################################
     return root
 
+
 def predict(root, instance):
     """
     Predict a given instance using the decision tree
@@ -243,6 +246,7 @@ def predict(root, instance):
     ###########################################################################
     return pred
 
+
 def calc_accuracy(node, dataset):
     """
     Predict a given dataset using the decision tree and calculate the accuracy
@@ -263,6 +267,7 @@ def calc_accuracy(node, dataset):
     ###########################################################################
     return accuracy
 
+
 def depth_pruning(X_train, X_test):
     """
     Calculate the training and testing accuracies for different depths
@@ -276,7 +281,7 @@ def depth_pruning(X_train, X_test):
     Output: the training and testing accuracies per max depth
     """
     training = []
-    testing  = []
+    testing = []
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
@@ -289,7 +294,6 @@ def depth_pruning(X_train, X_test):
 
 
 def chi_pruning(X_train, X_test):
-
     """
     Calculate the training and testing accuracies for different chi values
     using the best impurity function and the gain_ratio flag you got
@@ -305,7 +309,7 @@ def chi_pruning(X_train, X_test):
     - depths: the tree depth for each chi value
     """
     chi_training_acc = []
-    chi_testing_acc  = []
+    chi_testing_acc = []
     depth = []
     ###########################################################################
     # TODO: Implement the function.                                           #
@@ -315,6 +319,7 @@ def chi_pruning(X_train, X_test):
     #                             END OF YOUR CODE                            #
     ###########################################################################
     return chi_training_acc, chi_testing_acc, depth
+
 
 def count_nodes(node):
     """
@@ -334,9 +339,3 @@ def count_nodes(node):
     #                             END OF YOUR CODE                            #
     ###########################################################################
     return n_nodes
-
-
-
-
-
-
