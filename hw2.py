@@ -72,15 +72,24 @@ def calc_gini(data):
     Returns:
     - gini: The gini impurity value.
     """
-    gini = 0.0
+
     ###########################################################################
-    # TODO: Implement the function.                                           #
-    ###########################################################################
-    pass
+    classColumn = data[:, -1]
+    totalEntries = len(classColumn)
+    classes, counts = np.unique(classColumn, return_counts=True)
+    gini = 1
+    for c in counts:
+        gini = gini - (c/totalEntries)**2
+    return gini
+    
+    # p_sum = 0
+    # for key in value_counts.keys():
+    #     p_sum = p_sum  +  (value_counts[key] / n ) * (value_counts[key] / n ) 
+    # gini = 1 - p_sum
+    # return gini
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
-    return gini
 
 def calc_entropy(data):
     """
@@ -94,7 +103,7 @@ def calc_entropy(data):
     """
     entropy = 0.0
     ###########################################################################
-    # TODO: Implement the function.                                           #
+    print(data)                                       #
     ###########################################################################
     pass
     ###########################################################################
