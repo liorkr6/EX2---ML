@@ -179,15 +179,14 @@ class DecisionNode:
         Returns:
         - pred: the prediction of the node
         """
-        pred = None
-        ###########################################################################
-        # TODO: Implement the function.                                           #
-        ###########################################################################
-        pass
+
+        pred_options, counts = np.unique(self.data[:, -1], return_counts=True)
+        pred = pred_options[np.argmax(counts)]
+        return pred
+
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
-        return pred
 
     def add_child(self, node, val):
         """
@@ -209,10 +208,20 @@ class DecisionNode:
 
         This function has no return value
         """
-        ###########################################################################
-        # TODO: Implement the function.                                           #
-        ###########################################################################
-        pass
+        if impurity_func(self.data) == 0 or self.depth >= self.max_depth:
+            self.terminal = True
+            return
+
+        best_feature_index, best_feature_val, best_feature_data = None
+        features_num = np.shape(self.data)[1] - 1
+
+        for feature_index in range(features_num):
+            potential_val, potential_data = goodness_of_split(self.data, feature_index, impurity_func, self.gain_ratio)
+            if potential_val < best_feature_val:
+                best_feature = feature_index
+                best_feature_val = feature
+                best_feature_data = splitted_data
+        return
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
