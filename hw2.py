@@ -130,7 +130,7 @@ def goodness_of_split(data, feature, impurity_func, gain_ratio=False):
     """
     split = 1
     if gain_ratio:
-        impurity_func = calc_entropy()
+        impurity_func = calc_entropy
     goodness = 0
     groups = {}  # groups[feature_value] = data_subset
     feature_col = data[:, feature]
@@ -225,26 +225,21 @@ class DecisionNode:
                 best_feature_val = potential_val
                 best_feature_data = potential_data
 
-        # if best_feature_val == 0:
-        #     self.terminal = True
-        #     return
+        if best_feature_val == 0:
+            self.terminal = True
+            return
 
         self.feature = best_feature_index
+
         for item_data in best_feature_data:
-            child_node = DecisionNode(data=best_feature_data[item_data], depth=self.depth+1, max_depth=self.max_depth, gain_ratio=self.gain_ratio, chi=self.chi)
+            child_node = DecisionNode(data=best_feature_data[item_data], depth=self.depth + 1, max_depth=self.max_depth,
+                                      gain_ratio=self.gain_ratio, chi=self.chi)
             self.add_child(child_node, item_data)
         pass
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
 
-def split_recursive(node, impurity):
-    if node.terminal == True:
-        return
-    
-    node.split(impurity)
-    for child in node.children:
-        split_recursive(child, impurity)
 
 def build_tree(data, impurity, gain_ratio=False, chi=1, max_depth=1000):
     """
@@ -260,8 +255,15 @@ def build_tree(data, impurity, gain_ratio=False, chi=1, max_depth=1000):
 
     Output: the root node of the tree.
     """
-    ###########################################################################                                        #
-    ###########################################################################
+
+    def split_recursive(node, impurity):
+        if node.terminal:
+            return
+
+        node.split(impurity)
+        for child in node.children:
+            split_recursive(child, impurity)
+
     root = DecisionNode(data=data, max_depth=max_depth, gain_ratio=gain_ratio, chi=chi)
     split_recursive(root, impurity)
     return root
@@ -276,40 +278,42 @@ def predict(root, instance):
  
     Input:
     - root: the root of the decision tree.
-    - instance: an row vector from the dataset. Note that the last element 
+    - instance: a row vector from the dataset. Note that the last element
                 of this vector is the label of the instance.
- 
+
     Output: the prediction of the instance.
     """
-    pred = None
-    ###########################################################################
-    # TODO: Implement the function.                                           #
-    ###########################################################################
-    pass
+
+    if not root.terminal:
+        for child in root.children_values:
+            if child == instance[root.feature]:
+                feature = root.children_values.index(child)
+                return predict(root.children[feature], instance)
+    return root.pred
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
-    return pred
 
 
 def calc_accuracy(node, dataset):
     """
     Predict a given dataset using the decision tree and calculate the accuracy
- 
+
     Input:
     - node: a node in the decision tree.
     - dataset: the dataset on which the accuracy is evaluated
- 
+
     Output: the accuracy of the decision tree on the given dataset (%).
     """
-    accuracy = 0
-    ###########################################################################
-    # TODO: Implement the function.                                           #
-    ###########################################################################
-    pass
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
+    failures = 0
+    for row in dataset:
+        prediction = predict(node, row)
+        label = row[-1]
+        if prediction != label:
+            failures += 1
+    failures_percentage = failures / len(dataset)
+    accuracy = (1 - failures_percentage) * 100
     return accuracy
 
 
