@@ -213,7 +213,9 @@ class DecisionNode:
             self.terminal = True
             return
 
-        best_feature_index, best_feature_val, best_feature_data = None
+        best_feature_index = None
+        best_feature_val = 0
+        best_feature_data = None
         features_num = np.shape(self.data)[1] - 1
 
         for feature_index in range(features_num):
@@ -223,16 +225,26 @@ class DecisionNode:
                 best_feature_val = potential_val
                 best_feature_data = potential_data
 
-        if best_feature_val == 0:
-            self.terminal = True
-            return
+        # if best_feature_val == 0:
+        #     self.terminal = True
+        #     return
 
         self.feature = best_feature_index
-
+        for item_data in best_feature_data:
+            child_node = DecisionNode(data=best_feature_data[item_data], depth=self.depth+1, max_depth=self.max_depth, gain_ratio=self.gain_ratio, chi=self.chi)
+            self.add_child(child_node, item_data)
+        pass
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
 
+def split_recursive(node, impurity):
+    if node.terminal == True:
+        return
+    
+    node.split(impurity)
+    for child in node.children:
+        split_recursive(child, impurity)
 
 def build_tree(data, impurity, gain_ratio=False, chi=1, max_depth=1000):
     """
@@ -248,15 +260,14 @@ def build_tree(data, impurity, gain_ratio=False, chi=1, max_depth=1000):
 
     Output: the root node of the tree.
     """
-    root = None
+    ###########################################################################                                        #
     ###########################################################################
-    # TODO: Implement the function.                                           #
-    ###########################################################################
-    pass
+    root = DecisionNode(data=data, max_depth=max_depth, gain_ratio=gain_ratio, chi=chi)
+    split_recursive(root, impurity)
+    return root
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
-    return root
 
 
 def predict(root, instance):
