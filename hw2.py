@@ -75,12 +75,12 @@ def calc_gini(data):
     """
 
     ###########################################################################
-    classColumn = data.iloc[:, -1]
-    totalEntries = len(classColumn)
-    classCounts = classColumn.value_counts()
+    class_column = data[:, -1]
+    total_entries = len(class_column)
+    classes, counts = np.unique(class_column, return_counts=True)
     gini = 1
-    for c in classCounts:
-        prob = c / totalEntries
+    for c in counts:
+        prob = c / total_entries
         gini -= prob ** 2
     return gini
 
@@ -100,11 +100,11 @@ def calc_entropy(data):
     - entropy: The entropy value.
     """
     entropy = 0.0
-    classColumn = data.iloc[:, -1]
-    totalEntries = len(classColumn)
-    classCounts = classColumn.value_counts()
-    for c in classCounts:
-        prob = c / totalEntries
+    class_column = data[:, -1]
+    total_entries = len(class_column)
+    classes, counts = np.unique(class_column, return_counts=True)
+    for c in counts:
+        prob = c / total_entries
         entropy -= prob * np.log2(prob)
     return entropy
 
@@ -128,16 +128,34 @@ def goodness_of_split(data, feature, impurity_func, gain_ratio=False):
     - groups: a dictionary holding the data after splitting 
               according to the feature values.
     """
+    split = 1
+    if gain_ratio:
+        impurity_func = calc_entropy()
     goodness = 0
     groups = {}  # groups[feature_value] = data_subset
-    ###########################################################################
-    # TODO: Implement the function.                                           #
-    ###########################################################################
-    pass
+    feature_col = data[:, feature]
+    total_entries_feature = len(feature_col)
+    father_val = impurity_func(data)
+    children_val = 0
+
+    options_of_feature, values = np.unique(feature_col, return_counts=True)
+    feature_map = dict(zip(options_of_feature, values))
+
+    for feature_name, value in feature_map.items():
+        relevant_data = feature_col == feature_name
+        groups[feature_name] = data[relevant_data]
+        value_prob = value / total_entries_feature
+        children_val += value_prob * impurity_func(groups[feature_name])
+        if gain_ratio:
+            split -= value_prob * np.log2(value_prob)
+
+    goodness = (father_val - children_val) / split
+
+    return goodness, groups
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
-    return goodness, groups
 
 
 class DecisionNode:
