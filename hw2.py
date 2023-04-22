@@ -208,6 +208,7 @@ class DecisionNode:
 
         This function has no return value
         """
+
         if impurity_func(self.data) == 0 or self.depth >= self.max_depth:
             self.terminal = True
             return
@@ -217,11 +218,17 @@ class DecisionNode:
 
         for feature_index in range(features_num):
             potential_val, potential_data = goodness_of_split(self.data, feature_index, impurity_func, self.gain_ratio)
-            if potential_val < best_feature_val:
-                best_feature = feature_index
-                best_feature_val = feature
-                best_feature_data = splitted_data
-        return
+            if potential_val > best_feature_val:
+                best_feature_index = feature_index
+                best_feature_val = potential_val
+                best_feature_data = potential_data
+
+        if best_feature_val == 0:
+            self.terminal = True
+            return
+
+        self.feature = best_feature_index
+
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
