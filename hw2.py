@@ -197,6 +197,19 @@ class DecisionNode:
         self.children.append(node)
         self.children_values.append(val)
 
+    def calc_chi(self):
+        chi_score = 0
+        class_column = self.data[:,-1]
+        _, class_count = np.unique(class_column,return_counts = True)
+        class_probability = class_count / len(class_column)
+
+        for child in self.children:
+            _, child_class_count = np.unique(child.data[:,-1],return_counts = True)
+            E = len(child.data) * class_probability
+            chi_score += np.sum((child_class_count - E) ** 2 / E)
+
+        return chi_score
+
     def split(self, impurity_func):
         """
         Splits the current node according to the impurity_func. This function finds
@@ -235,7 +248,14 @@ class DecisionNode:
             child_node = DecisionNode(data=best_feature_data[item_data], depth=self.depth + 1, max_depth=self.max_depth,
                                       gain_ratio=self.gain_ratio, chi=self.chi)
             self.add_child(child_node, item_data)
-        pass
+        
+        self.calc_chi()
+        DOF = len(self.children) - 1
+        if self.chi != 1 and chi_table[DOF][self.chi] > self.calc_chi():
+            self.terminal = True
+            self.children = []
+            self.children_values = []
+            return
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -335,7 +355,9 @@ def depth_pruning(X_train, X_test):
     # TODO: Implement the function.                                           #
     ###########################################################################
     for max_depth in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
-        pass
+        pruned_tree = build_tree(data=X_train, impurity=calc_entropy, gain_ratio=True, max_depth=max_depth)
+        testing.append(calc_accuracy(pruned_tree, X_test))
+        training.append(calc_accuracy(pruned_tree, X_train))
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -360,10 +382,25 @@ def chi_pruning(X_train, X_test):
     chi_training_acc = []
     chi_testing_acc = []
     depth = []
-    ###########################################################################
-    # TODO: Implement the function.                                           #
-    ###########################################################################
-    pass
+
+    def find_max_depth(node):
+        max_depth = 0
+        if node.terminal:
+            return node.depth
+        else:
+            for child in node.children:
+                child_depth = find_max_depth(child)
+                if child_depth > max_depth:
+                    max_depth = child_depth
+            return max_depth
+
+    chi_values = [1, 0.5, 0.25, 0.1, 0.05, 0.0001]
+
+    for chi in chi_values:
+        pruned_tree = build_tree(data=X_train, impurity=calc_entropy, gain_ratio=True, chi=chi)
+        chi_training_acc.append(calc_accuracy(pruned_tree, X_train))
+        chi_testing_acc.append(calc_accuracy(pruned_tree, X_test))
+        depth.append(find_max_depth(pruned_tree))
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -380,10 +417,16 @@ def count_nodes(node):
     Output: the number of nodes in the tree.
     """
     n_nodes = None
+    children_nodes = 0
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    if node.terminal:
+        return 1
+    else:
+        for child in node.children:
+            children_nodes += count_nodes(child)
+        n_nodes = 1 + children_nodes
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
